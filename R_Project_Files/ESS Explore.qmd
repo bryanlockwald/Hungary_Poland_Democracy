@@ -1,0 +1,388 @@
+---
+title: "ESS Explore"
+author: "Bryan Lockwald"
+format: 
+  dashboard: 
+    orientation: columns
+    nav-buttons: [github]
+    github: https://github.com/bryanlockwald
+sidebar: 
+  - title: "Resources"
+    items: 
+      - text: "Codebook"
+        href: documents/ESS_1_9_codebook.html
+editor: visual
+---
+
+```{r}
+
+library(tidyverse)
+library(ggplot2)
+library(countrycode)
+library(gt)
+library(tidyr)
+library(DataExplorer)
+library(dlookr)
+
+
+
+
+
+
+
+```
+
+```{r}
+
+
+library(haven)
+ess_data <- read_dta("~/Documents/UNLV Political Science PhD/Working Projects/When the Electorate Demands Less Democracy/Data/01_raw/ESS 1-9/ESS1e06_7-ESS2e03_6-ESS3e03_7-ESS4e04_6-ESS5e03_5-ESS6e02_6-ESS7e02_3-ESS8e02_3-ESS9e03_2-ESS10-ESS10SC-ESS11-subset/ESS1e06_7-ESS2e03_6-ESS3e03_7-ESS4e04_6-ESS5e03_5-ESS6e02_6-ESS7e02_3-ESS8e02_3-ESS9e03_2-ESS10-ESS10SC-ESS11-subset.dta")
+
+
+```
+
+```{r}
+
+
+## Create new variable of year coresponding to each ESS round
+
+ess_data <- ess_data |> 
+  mutate(year = case_when(
+    essround == 1 ~ 2002,
+    essround == 2 ~ 2004,
+    essround == 3 ~ 2006,
+    essround == 4 ~ 2008,
+    essround == 5 ~ 2010,
+    essround == 6 ~ 2012,
+    essround == 7 ~ 2014,
+    essround == 8 ~ 2016,
+    essround == 9 ~ 2018
+  )) |> 
+  relocate(year, .after = essround)
+
+
+# create country names from iso2c codes
+
+ess_data <- ess_data  |> 
+  mutate(cntry_full = countrycode(sourcevar = cntry, origin = 'iso2c', destination = 'country.name'))
+
+ess_data <- ess_data |> 
+  relocate(cntry_full, .after = cntry)
+
+
+```
+
+# Satisfaction With Institutions
+
+## Row 1
+
+### Satisfaction with Democracy Plot
+
+```{r}
+
+
+ess_data %>%
+  filter(!is.na(stfdem)) %>%
+  ggplot(aes(x = year, y = stfdem, fill = cntry)) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge") +
+  geom_smooth(method = "lm", color = "red", se = FALSE, aes(group = cntry)) +
+  labs(title = "Satisfaction with Democracy Over ESS Rounds",
+       subtitle = "ESS rounds are published every two years",
+       x = "ESS Round",
+       y = "Mean Satisfaction with Democracy") +
+  facet_wrap(~cntry_full) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+```
+
+### Satisfaction with Government
+
+```{r}
+
+ggplot(ess_data, aes(x = year, y = stfgov, fill = cntry_full)) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge") +
+  geom_smooth(method = "lm", color = "red", se = FALSE, aes(group=cntry)) +
+  labs(title = "Satsifaction with Government - ESS Rounds Years 2002 - 2018",
+       x = "ESS Round",
+       y = "Mean Satisfaction with Government") +
+  facet_wrap(~cntry_full) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+
+
+```
+
+### Satisfaction with Economy
+
+```{r}
+
+ggplot(ess_data, aes(x = year, y = stfeco, fill = cntry_full)) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge") +
+  geom_smooth(method = "lm", color = "red", se = FALSE, aes(group=cntry)) +
+  labs(title = "Satsifaction with Economy - ESS Rounds Years 2002 - 2018",
+       x = "ESS Round",
+       y = "Mean Satisfaction with Economy") +
+  facet_wrap(~cntry_full) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+
+## Row 2
+
+### Satisfaction with Education
+
+```{r}
+
+ggplot(ess_data, aes(x = year, y = stfedu, fill = cntry_full)) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge") +
+  geom_smooth(method = "lm", color = "red", se = FALSE, aes(group=cntry)) +
+  labs(title = "Satsifaction with Education - ESS Rounds Years 2002 - 2018",
+       x = "ESS Round",
+       y = "Mean Satisfaction with Education") +
+  facet_wrap(~cntry_full) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+
+### State of Health Services
+
+```{r}
+
+ggplot(ess_data, aes(x = year, y = stfhlth, fill = cntry_full)) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge") +
+  geom_smooth(method = "lm", color = "red", se = FALSE, aes(group=cntry)) +
+  labs(title = "Satsifaction with Health Services - ESS Rounds Years 2002 - 2018",
+       x = "ESS Round",
+       y = "Mean Satisfaction with Health Services") +
+  facet_wrap(~cntry_full) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+
+### Life Satisfaction
+
+```{r}
+
+ggplot(ess_data, aes(x = year, y = stflife, fill = cntry_full)) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge") +
+  geom_smooth(method = "lm", color = "red", se = FALSE, aes(group=cntry)) +
+  labs(title = "Satsifaction with Life - ESS Rounds Years 2002 - 2018",
+       x = "ESS Round",
+       y = "Mean Satisfaction with Life") +
+  facet_wrap(~cntry_full) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+
+# Trust in Institutions
+
+## Row 1 Institutions
+
+### Trust in European Parliament
+
+```{r}
+
+ggplot(ess_data, aes(x = year, y = trstep, fill = cntry_full)) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge") +
+  geom_smooth(method = "lm", color = "red", se = FALSE, aes(group=cntry)) +
+  labs(title = "Trust in EU Perliament - ESS Rounds Years 2002 - 2018",
+       x = "ESS Round",
+       y = "Mean Trust in EU Parliament") +
+  facet_wrap(~cntry_full) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+
+### Trust in Legal System
+
+```{r}
+
+ggplot(ess_data, aes(x = year, y = trstlgl, fill = cntry_full)) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge") +
+  geom_smooth(method = "lm", color = "red", se = FALSE, aes(group=cntry)) +
+  labs(title = "Trust in the Legal System - ESS Rounds Years 2002 - 2018",
+       x = "ESS Round",
+       y = "Mean Trust in Legal System") +
+  facet_wrap(~cntry_full) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+
+### Trust in Police
+
+```{r}
+
+ggplot(ess_data, aes(x = year, y = trstplc, fill = cntry_full)) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge") +
+  geom_smooth(method = "lm", color = "red", se = FALSE, aes(group=cntry)) +
+  labs(title = "Trust in the Police - ESS Rounds Years 2002 - 2018",
+       x = "ESS Round",
+       y = "Mean Trust in Police") +
+  facet_wrap(~cntry_full) +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+## Row 2 Institutioins
+
+### Trust in Polititians
+
+```{r}
+
+ggplot(ess_data, aes(x = year, y = trstplt, fill = cntry_full)) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge") +
+  geom_smooth(method = "lm", color = "red", se = FALSE, aes(group=cntry)) +
+  labs(title = "Trust in Politicians - ESS Rounds Years 2002 - 2018",
+       x = "ESS Round",
+       y = "Mean Trust in Politicians") +
+  facet_wrap(~cntry_full) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+
+### Trust in Parliament
+
+```{r}
+
+ggplot(ess_data, aes(x = year, y = trstprl, fill = cntry_full)) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge") +
+  geom_smooth(method = "lm", color = "red", se = FALSE, aes(group=cntry)) +
+  labs(title = "Trust in National Parliament - ESS Rounds Years 2002 - 2018",
+       x = "ESS Round",
+       y = "Mean Trust in National Parliament") +
+  facet_wrap(~cntry_full) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+# ess_data %>%
+#   filter(!is.na(trstprl)) %>%
+#   ggplot(aes(x = year, y = trstprl, fill = cntry_full)) +
+#   geom_bar(stat = "summary", fun = "mean", position = "dodge") +
+#   geom_smooth(method = "lm", color = "red", se = FALSE, aes(group = cntry)) +
+#   labs(title = "Trust in National Parliament - ESS Rounds Years 2002 - 2018",
+#        x = "ESS Round",
+#        y = "Mean Trust in National Parliament") +
+#   facet_wrap(~cntry_full) +
+#   theme_minimal() +
+#   theme(legend.position = "none")
+
+```
+
+### Trust in the United Nations
+
+```{r}
+
+ggplot(ess_data, aes(x = year, y = trstun, fill = cntry_full)) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge") +
+  geom_smooth(method = "lm", color = "red", se = FALSE, aes(group=cntry)) +
+  labs(title = "Trust in The United Nations - ESS Rounds Years 2002 - 2018",
+       x = "ESS Round",
+       y = "Mean Trust in the UN") +
+  facet_wrap(~cntry_full) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+
+
+```
+
+# Immigration
+
+## Row 1 Immigration
+
+### Allow few/many of same race/ethnic group as majority?
+
+```{r}
+
+ggplot(ess_data, aes(x = year, y = imsmetn, fill = cntry_full)) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge") +
+  geom_smooth(method = "lm", color = "red", se = FALSE, aes(group=cntry)) +
+  labs(title = "Allow few/many immigrants of same race/ethnic group as majority?",
+       x = "ESS Round",
+       y = "Mean Allow same Race/Ethnic Groups?") +
+  facet_wrap(~cntry_full) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+
+### Allow few/many of different race/ethnic group as majority?
+
+```{r}
+
+ggplot(ess_data, aes(x = year, y = imdfetn, fill = cntry_full)) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge") +
+  geom_smooth(method = "lm", color = "red", se = FALSE, aes(group=cntry)) +
+  labs(title = "Allow few/many immigrants of different race/ethnic group as majority?",
+       x = "ESS Round",
+       y = "Mean Allow different Race/Ethnic Groups?") +
+  facet_wrap(~cntry_full) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+
+### Allow many/few immigrants from poorer countries outside of Europe?
+
+```{r}
+
+ggplot(ess_data, aes(x = year, y = impcntr, fill = cntry_full)) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge") +
+  geom_smooth(method = "lm", color = "red", se = FALSE, aes(group=cntry)) +
+  labs(title = "Allow many/few immigrants from poorer countries outside of Europe?",
+       x = "ESS Round",
+       y = "Mean Allow Immigrants from Poor Countries?") +
+  facet_wrap(~cntry_full) +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+## Row 2 Immigration
+
+### Immigration good/bad for countries economy?
+
+```{r}
+
+ggplot(ess_data, aes(x = year, y = imbgeco, fill = cntry_full)) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge") +
+  geom_smooth(method = "lm", color = "red", se = FALSE, aes(group=cntry)) +
+  labs(title = "Immigration good/bad for countries economy?",
+       x = "ESS Round",
+       y = "Immigration good/bad for countries economy?") +
+  facet_wrap(~cntry_full) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+
+### Countries Cultural Life is Undermined or Enriched by Immigrants?
+
+```{r}
+
+ggplot(ess_data, aes(x = year, y = imueclt, fill = cntry_full)) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge") +
+  geom_smooth(method = "lm", color = "red", se = FALSE, aes(group=cntry)) +
+  labs(title = "Countries Cultural Life is Undermined or Enriched by Immigrants?",
+       x = "ESS Round",
+       y = "Undermined or Enriched by Immigrants?") +
+  facet_wrap(~cntry_full) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+
+# Code Book
+
+[Codebook](https://bryanlockwald.github.io/DemosParadox/)
